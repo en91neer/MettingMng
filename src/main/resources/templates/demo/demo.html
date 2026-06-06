@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Vue + SpringBoot</title>
+	<!-- Vue CDN -->
+	<script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+</head>
+
+<body>
+	<div id="app">
+		<h1>사용자 목록</h1>
+		<button @click="loadUsers">
+			조회
+		</button>
+
+		<table border="1">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>이름</th>
+					<th>나이</th>
+				</tr>
+			</thead>
+
+			<tbody>
+				<tr v-for="user in users" :key="user.id">
+					<td>{{ user.id }}</td>
+					<td>{{ user.name }}</td>
+					<td>{{ user.age }}</td>
+
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<script>
+		
+		const {createApp} = Vue;
+
+		createApp({
+			data() {
+				return {
+					users: []
+				}
+			},
+			methods: {
+				async loadUsers() {
+					try {
+						const response = await fetch('/users/getUsers');
+						const data = await response.json();
+
+						console.log(data);
+						this.users = data;
+
+					} catch (error) {
+						console.error(error);
+					}
+				}
+			},
+
+			mounted() {
+				// 페이지 열리면 자동 조회
+				this.loadUsers();
+			}
+		}).mount('#app');
+	</script>
+</body>
+</html>

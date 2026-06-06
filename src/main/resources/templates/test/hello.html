@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<title>SpringMVC - templates</title>
+
+<!-- Vue CDN 추가 -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+</head>
+<body>
+
+<div id="app">
+    <h1>{{ message }}</h1>
+    <button @click="count++">클릭</button>
+    <p>{{ count }}</p>
+</div>
+
+<script>
+const { createApp } = Vue
+
+createApp({
+    data() {
+        return {
+            message: 'Hello Vue!',
+            count: 0
+        }
+    }
+}).mount('#app')
+</script>
+
+</body>
+</html>

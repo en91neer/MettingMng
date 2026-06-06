@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.repository.mapper.MeetingMinutesMapper">
+    <select id="meetingMinutesList" parameterType="com.example.demo.dto.MeetingMinutesRequestDto" resultType="com.example.demo.entity.MeetingMinutesResult">
+        /* 회의록 정보 조회 */
+        select
+			a.id id
+			, a.meeting_owner_id meetingOwnerId
+			, a.subject subject
+			, a.subject_code subjectCode
+			, a.content content
+			, to_char(a.meeting_date,'yyyy-mm-dd hh24:mi') meetingDate
+			, to_char(a.created_at,'yyyy-mm-dd hh24:mi') createdAt
+			, coalesce(b.id, 0) file_id
+			, b.audio_file_path audioFilePath
+			, b.transcript_file_path transcriptFilePath
+			, b.summary_file_path summaryFilePath
+			, b.analyze_status analyzeStatus
+		from meeting_minutes a
+		left outer join file_attach b
+		on a.id = b.target_id
+		<where>
+	        <if test="loginEmail != null and loginEmail != ''">
+	            AND a.meeting_owner_id = #{loginEmail}
+	        </if>
+	        <if test="subject != null and subject != ''">
+	            AND a.subject LIKE '%' || #{subject} || '%'
+	        </if>
+	        <if test="startDate != null and startDate != ''">
+	            AND a.created_at &gt;= to_timestamp(#{startDate}, 'YYYY-MM-DD')
+	        </if>
+	        <if test="endDate != null and endDate != ''">
+	            AND a.created_at &lt; to_timestamp(#{endDate}, 'YYYY-MM-DD') + interval '1 day'
+	        </if>
+	        <if test="analysisType != null and analysisType != '' and analysisType != '전체'">
+	            AND EXISTS (
+	                SELECT 1
+	                FROM analysis_result ar
+	                WHERE ar.file_id = b.id
+	                  AND ar.analysis_type_code = #{analysisType}
+	            )
+	        </if>
+    	</where>
+    	order by a.created_at desc, a.id desc
+    	<if test="limit != null">
+    	    limit #{limit}
+    	</if>
+    	<if test="offset != null">
+    	    offset #{offset}
+    	</if>
+    </select>
+</mapper>

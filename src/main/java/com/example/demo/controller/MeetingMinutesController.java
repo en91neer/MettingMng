@@ -42,6 +42,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.dto.AnalysisResultDto;
 import com.example.demo.dto.AnalysisResultUpdateRequestDto;
 import com.example.demo.dto.MeetingMinutesRequestDto;
+import com.example.demo.dto.MeetingSubjectUpdateRequestDto;
 import com.example.demo.dto.TranscriptUpdateRequestDto;
 import com.example.demo.entity.MeetingMinutesResult;
 import com.example.demo.service.MeetingMinutesService;
@@ -151,6 +152,22 @@ public class MeetingMinutesController {
         dto.setLoginEmail(loginEmail);
 
         return meetingMinutesService.updateAnalysisResult(dto);
+    }
+
+    /**
+     * 회의 주제 수정
+     */
+    @PutMapping("/subject")
+    public String updateSubject(
+            @RequestBody MeetingSubjectUpdateRequestDto dto,
+            @RequestHeader(value = "X-Login-Email", required = false) String loginEmail,
+            @RequestHeader(value = "X-Auth-Token", required = false) String authToken
+    ) {
+        validateLogin(loginEmail, authToken);
+        dto.setLoginEmail(loginEmail);
+        meetingMinutesService.updateSubject(dto);
+
+        return "수정 완료";
     }
 
     /**

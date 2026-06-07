@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.demo.dto.MeetingMinutesRequestDto;
 import com.example.demo.dto.AnalysisResultDto;
 import com.example.demo.dto.AnalysisResultUpdateRequestDto;
+import com.example.demo.dto.MeetingSubjectUpdateRequestDto;
 import com.example.demo.dto.TranscriptUpdateRequestDto;
 import com.example.demo.entity.AnalysisResult;
 import com.example.demo.entity.FileAttach;
@@ -179,6 +180,32 @@ public class MeetingMinutesService {
         );
 
         return new AnalysisResultDto(savedAnalysisResult);
+    }
+
+    @Transactional
+    public void updateSubject(MeetingSubjectUpdateRequestDto dto) {
+        if (dto.getSubject() == null || dto.getSubject().isBlank()) {
+            throw new RuntimeException("회의 주제를 입력해주세요.");
+        }
+
+        MeetingMinutes meetingMinutes =
+                meetingMinutesRepository
+                        .findById(dto.getId())
+                        .orElseThrow(() -> new RuntimeException("회의정보가 없습니다."));
+
+        if (!dto.getLoginEmail().equals(meetingMinutes.getMeetingOwnerId())) {
+            throw new RuntimeException("본인 회의정보만 수정할 수 있습니다.");
+        }
+
+        meetingMinutes.setSubject(dto.getSubject().trim());
+        meetingMinutes.setUpdatedBy(dto.getLoginEmail());
+        meetingMinutesRepository.save(meetingMinutes);
+        saveUserActionLog(
+                dto.getLoginEmail(),
+                "UPDATE",
+                "MEETING_MINUTES_SUBJECT",
+                meetingMinutes.getId()
+        );
     }
 
     @Transactional

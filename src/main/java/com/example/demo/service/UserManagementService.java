@@ -25,6 +25,7 @@ public class UserManagementService {
 
     private static final String STATUS_ACTIVE = "ACTIVE";
     private static final String CATEGORY_ANALYSIS_SUMMARY = "ANALYSIS_SUMMARY";
+    private static final String ROLE_SUPER_USER = "SUPER_USER";
 
     private final UserRepository userRepository;
     private final MeetingTemplateRepository meetingTemplateRepository;
@@ -107,6 +108,28 @@ public class UserManagementService {
                         .toList();
 
         userTemplatePermissionRepository.saveAll(permissions);
+    }
+
+    @Transactional
+    public void deleteUser(Long userId, String loginEmail) {
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new RuntimeException("가입자를 찾을 수 없습니다."));
+
+        if (user.getEmail().equalsIgnoreCase(loginEmail)) {
+            throw new RuntimeException("현재 로그인한 계정은 삭제할 수 없습니다.");
+        }
+
+        if (
+                ROLE_SUPER_USER.equals(user.getRoleCode())
+                        && userRepository.countByRoleCode(ROLE_SUPER_USER) <= 1
+        ) {
+            throw new RuntimeException("슈퍼유저가 한 명일 때는 삭제할 수 없습니다.");
+        }
+
+        userTemplatePermissionRepository.deleteByUserEmailIgnoreCase(user.getEmail());
+        userRepository.delete(user);
     }
 
     private Set<String> getActiveAnalysisTemplateCodes() {

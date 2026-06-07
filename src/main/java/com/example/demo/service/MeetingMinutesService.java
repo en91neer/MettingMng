@@ -56,6 +56,7 @@ public class MeetingMinutesService {
     private final AnalysisResultRepository analysisResultRepository;
     private final UserActionLogRepository userActionLogRepository;
     private final MeetingMinutesMapper meetingMinutesMapper;
+    private final AuthService authService;
     
     @Value("${file.upload-root-path:c:/dog-walk-nas/upload/}")
     private String rootPath;
@@ -98,7 +99,10 @@ public class MeetingMinutesService {
     public void deleteMeetingMinutes(Long meetingMinutesId, String loginEmail) {
         log.info(">>>회의정보 삭제 meetingMinutesId={}, loginEmail={}", meetingMinutesId, loginEmail);
 
-        if (!meetingMinutesRepository.existsByIdAndMeetingOwnerId(meetingMinutesId, loginEmail)) {
+        if (
+                !authService.isSuperUserEmail(loginEmail)
+                        && !meetingMinutesRepository.existsByIdAndMeetingOwnerId(meetingMinutesId, loginEmail)
+        ) {
             throw new RuntimeException("삭제할 회의정보가 없습니다.");
         }
 
@@ -193,7 +197,10 @@ public class MeetingMinutesService {
                         .findById(dto.getId())
                         .orElseThrow(() -> new RuntimeException("회의정보가 없습니다."));
 
-        if (!dto.getLoginEmail().equals(meetingMinutes.getMeetingOwnerId())) {
+        if (
+                !authService.isSuperUserEmail(dto.getLoginEmail())
+                        && !dto.getLoginEmail().equals(meetingMinutes.getMeetingOwnerId())
+        ) {
             throw new RuntimeException("본인 회의정보만 수정할 수 있습니다.");
         }
 
@@ -559,7 +566,10 @@ public class MeetingMinutesService {
             throw new RuntimeException("로그인 정보가 없습니다.");
         }
 
-        if (!loginEmail.equals(fileAttach.getCreatedBy())) {
+        if (
+                !authService.isSuperUserEmail(loginEmail)
+                        && !loginEmail.equals(fileAttach.getCreatedBy())
+        ) {
             throw new RuntimeException("본인 파일만 조회할 수 있습니다.");
         }
     }

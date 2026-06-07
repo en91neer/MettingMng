@@ -37,6 +37,15 @@ public class ImplementationInquiryService {
                 .toList();
     }
 
+    @Transactional
+    public void deleteInquiry(Long inquiryId) {
+        if (!implementationInquiryRepository.existsById(inquiryId)) {
+            throw new RuntimeException("도입문의를 찾을 수 없습니다.");
+        }
+
+        implementationInquiryRepository.deleteById(inquiryId);
+    }
+
     private String require(String value, String message) {
         if (value == null || value.isBlank()) {
             throw new RuntimeException(message);

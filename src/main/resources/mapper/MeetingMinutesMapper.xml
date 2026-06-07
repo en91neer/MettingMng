@@ -17,11 +17,30 @@
 			, b.transcript_file_path transcriptFilePath
 			, b.summary_file_path summaryFilePath
 			, b.analyze_status analyzeStatus
+			, (
+			    select string_agg(ar_codes.analysis_type_code, ',' order by ar_codes.analysis_type_code)
+			    from (
+			        select distinct ar.analysis_type_code
+			        from analysis_result ar
+			        where ar.file_id = b.id
+			    ) ar_codes
+			  ) analysisTypeCodes
+			, (
+			    select string_agg(
+			        ar_history.analysis_type_code || '|' || to_char(ar_history.analyzed_at, 'yyyy-mm-dd hh24:mi'),
+			        ',' order by ar_history.analyzed_at desc
+			    )
+			    from analysis_result ar_history
+			    where ar_history.file_id = b.id
+			  ) analysisHistory
 		from meeting_minutes a
 		left outer join file_attach b
 		on a.id = b.target_id
 		<where>
-	        <if test="loginEmail != null and loginEmail != ''">
+	        <if test="ownerSearch != null and ownerSearch != ''">
+	            AND lower(a.meeting_owner_id) LIKE '%' || lower(#{ownerSearch}) || '%'
+	        </if>
+	        <if test="(ownerSearch == null or ownerSearch == '') and loginEmail != null and loginEmail != ''">
 	            AND a.meeting_owner_id = #{loginEmail}
 	        </if>
 	        <if test="subject != null and subject != ''">
@@ -42,7 +61,11 @@
 	            )
 	        </if>
     	</where>
-    	order by a.created_at desc, a.id desc
+    	order by (
+    	    select max(ar_sort.analyzed_at)
+    	    from analysis_result ar_sort
+    	    where ar_sort.file_id = b.id
+    	) desc nulls last, a.created_at desc, a.id desc
     	<if test="limit != null">
     	    limit #{limit}
     	</if>

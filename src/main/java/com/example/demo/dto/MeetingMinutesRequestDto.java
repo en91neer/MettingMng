@@ -20,6 +20,9 @@ public class MeetingMinutesRequestDto {
     private String endDate;
     private String analysisType;
     private String loginEmail;
+    private String accountSearch;
+    private String ownerSearch;
+    private Boolean includeAllAccounts;
     private Integer offset;
     private Integer limit;
 }

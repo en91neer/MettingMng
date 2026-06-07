@@ -13,4 +13,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findBySessionToken(String sessionToken);
 
     List<User> findAllByOrderByCreatedAtDesc();
+
+    long countByRoleCode(String roleCode);
 }

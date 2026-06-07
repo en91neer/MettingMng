@@ -3,6 +3,8 @@ package com.example.demo.controller;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -56,5 +58,17 @@ public class UserManagementController {
         userManagementService.saveTemplatePermissions(dto);
 
         return "저장완료";
+    }
+
+    @DeleteMapping("/{userId}")
+    public String deleteUser(
+            @PathVariable Long userId,
+            @RequestHeader(value = "X-Login-Email", required = false) String loginEmail,
+            @RequestHeader(value = "X-Auth-Token", required = false) String authToken
+    ) {
+        authService.validateAdmin(loginEmail, authToken);
+        userManagementService.deleteUser(userId, loginEmail);
+
+        return "삭제완료";
     }
 }

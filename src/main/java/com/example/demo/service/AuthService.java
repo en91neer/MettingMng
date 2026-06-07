@@ -254,7 +254,7 @@ public class AuthService {
                         .findByEmail(normalizeEmail(email))
                         .orElseThrow(() -> new RuntimeException("로그인이 필요합니다."));
 
-        if (!ROLE_SUPER_USER.equals(user.getRoleCode()) || !isAdminEmail(user.getEmail())) {
+        if (!ROLE_SUPER_USER.equals(user.getRoleCode())) {
             throw new RuntimeException("관리자 권한이 필요합니다.");
         }
     }
@@ -272,6 +272,23 @@ public class AuthService {
         user.setSessionExpiresAt(null);
 
         userRepository.save(user);
+    }
+
+    public boolean isSuperUserEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+
+        String normalizedEmail = email.trim().toLowerCase();
+
+        if (isAdminEmail(normalizedEmail)) {
+            return true;
+        }
+
+        return userRepository
+                .findByEmail(normalizedEmail)
+                .map(user -> ROLE_SUPER_USER.equals(user.getRoleCode()))
+                .orElse(false);
     }
 
     private String normalizeEmail(String email) {

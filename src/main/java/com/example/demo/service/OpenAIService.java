@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -79,6 +80,9 @@ public class OpenAIService {
 
 	// DB에서 분석/화자분리 프롬프트 템플릿을 조회한다.
 	private final MeetingTemplateRepository meetingTemplateRepository;
+
+	// 슈퍼유저의 관리자 분석 요청을 허용할 때 사용한다.
+	private final AuthService authService;
 
 	// 서버 기동 후 당일 OpenAI 예상 사용량을 메모리에서 누적 관리한다.
 	private final AtomicInteger estimatedTokensUsedToday = new AtomicInteger(0);
@@ -193,7 +197,7 @@ public class OpenAIService {
 					.getMessage()
 					.getContent();
 			summaryText = normalizeSummaryTitle(summaryText, analysisTypeName);
-			summaryText = appendConversationTranscript(summaryText, transcriptForAnalysis);
+			summaryText = sanitizeAnalysisSummary(summaryText);
 			statsWebSocketHandler.sendAnalyzeProgress(fileId, 80, AnalyzeStatus.PROCESSING.name(), "회의록 요약 완료");
 			
 			// 결과를 파일로 저장한다.
@@ -254,38 +258,19 @@ public class OpenAIService {
 		""".formatted(title, content);
 	}
 
-	// 2-2. 최종 요약 하단에 화자분리된 대화록을 붙이고, 화자가 바뀔 때 한 줄을 비운다.
-	private String appendConversationTranscript(String summaryText, String speakerSeparatedTranscript) {
-		if (speakerSeparatedTranscript == null || speakerSeparatedTranscript.isBlank()) {
-			return summaryText;
-		}
-
-		String normalizedTranscript =
-				speakerSeparatedTranscript
-						.replace("[화자분리 전사문]", "")
-						.replaceAll("\\R(?=화자\\d+\\s*:)", "\n\n")
-						.replaceAll("\\n{3,}", "\n\n")
-						.strip();
-
+	private String sanitizeAnalysisSummary(String summaryText) {
 		if (summaryText == null || summaryText.isBlank()) {
-			return """
-					[대화록]
-
-					%s
-					""".formatted(normalizedTranscript);
-		}
-
-		if (summaryText.contains("[대화록]")) {
 			return summaryText;
 		}
 
-		return """
-				%s
-
-				[대화록]
-
-				%s
-				""".formatted(summaryText.strip(), normalizedTranscript);
+		return summaryText
+				.replaceFirst("(?s)\\R*\\[대화록\\].*$", "")
+				.replaceAll(
+						"(?m)(^\\s*(?:#{1,6}\\s*)?(?:\\*\\*)?(?:핵심|결정|할\\s*일|할일|용어\\s*설명)(?:\\*\\*)?\\s*:?\\s*)\\R{2,}",
+						"$1\n"
+				)
+				.replaceAll("\\R{3,}", "\n\n")
+				.strip();
 	}
 
 	// 3-1. 분석 결과를 DB에 저장하고 분석 실행 이력을 남긴다.
@@ -310,6 +295,7 @@ public class OpenAIService {
 						);
 
 		analysisResult.setContent(summaryText);
+		analysisResult.setAnalyzedAt(LocalDateTime.now());
 		analysisResult.setUpdatedBy(loginEmail);
 
 		if (analysisResult.getCreatedBy() == null) {
@@ -650,7 +636,10 @@ public class OpenAIService {
 			throw new RuntimeException("로그인 정보가 없습니다.");
 		}
 
-		if (!loginEmail.equals(fileAttach.getCreatedBy())) {
+		if (
+				!authService.isSuperUserEmail(loginEmail)
+				&& !loginEmail.equals(fileAttach.getCreatedBy())
+		) {
 			throw new RuntimeException("본인 파일만 분석할 수 있습니다.");
 		}
 	}

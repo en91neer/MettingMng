@@ -105,7 +105,7 @@ public class MeetingMinutesController {
             @RequestHeader(value = "X-Auth-Token", required = false) String authToken
     ) {
         validateLogin(loginEmail, authToken);
-        dto.setLoginEmail(loginEmail);
+        applyAccountScope(dto, loginEmail, authToken);
 
         return meetingMinutesService.meetingMinutesList(dto);
     }
@@ -221,13 +221,37 @@ public class MeetingMinutesController {
             HttpServletResponse response
     ) throws Exception {
         validateLogin(loginEmail, authToken);
-        dto.setLoginEmail(loginEmail);
+        applyAccountScope(dto, loginEmail, authToken);
         meetingMinutesService.excelDownload(dto, response);
 
     }
 
     private void validateLogin(String loginEmail, String authToken) {
         authService.validateSession(loginEmail, authToken);
+    }
+
+    private void applyAccountScope(
+            MeetingMinutesRequestDto dto,
+            String loginEmail,
+            String authToken
+    ) {
+        boolean adminScope =
+                Boolean.TRUE.equals(dto.getIncludeAllAccounts())
+                        || (dto.getAccountSearch() != null && !dto.getAccountSearch().isBlank());
+
+        if (!adminScope) {
+            dto.setLoginEmail(loginEmail);
+            dto.setOwnerSearch(null);
+            return;
+        }
+
+        authService.validateAdmin(loginEmail, authToken);
+        dto.setLoginEmail(null);
+        dto.setOwnerSearch(
+                dto.getAccountSearch() == null
+                        ? null
+                        : dto.getAccountSearch().trim()
+        );
     }
 }
 

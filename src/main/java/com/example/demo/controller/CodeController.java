@@ -87,7 +87,7 @@ public class CodeController {
         authService.validateAdmin(loginEmail, authToken);
         codeService.deleteGroup(id);
 
-        return "삭제 완료";
+        return "삭제 완료11";
     }
 
     @DeleteMapping("/items/{id}")

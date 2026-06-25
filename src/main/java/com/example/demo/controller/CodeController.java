@@ -49,6 +49,8 @@ public class CodeController {
             @RequestHeader(value = "X-Login-Email", required = false) String loginEmail,
             @RequestHeader(value = "X-Auth-Token", required = false) String authToken
     ) {
+    	
+    	System.out.println("dd");
         authService.validateAdmin(loginEmail, authToken);
 
         return codeService.getAllCodes(groupCode);

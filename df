@@ -1,0 +1,53 @@
+[33mcommit b56311d6c5c884b21b8e31e1ce7236b18d5f0581[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mP268087[m[33m)[m
+Author: en91neer <en91neer@gmail.com>
+Date:   Thu Jun 25 21:49:29 2026 +0900
+
+    33으로 브런치커밋
+
+[33mcommit ff195d6e7ff24b90c7691c2b84e44acae837c5cf[m[33m ([m[1;31morigin/master[m[33m, [m[1;32mmaster[m[33m)[m
+Author: en91neer <en91neer@gmail.com>
+Date:   Thu Jun 25 21:33:44 2026 +0900
+
+    로컬커밋 2.0
+
+[33mcommit c252a15d18e59bb1ffddee545de2d5eb05b09b9a[m
+Author: en91neer <en91neer@gmail.com>
+Date:   Thu Jun 25 21:31:11 2026 +0900
+
+    GIT 로컬커밋1.0
+
+[33mcommit 9d9aa34dcc333a34082b95c6a707a964138902f2[m
+Author: en91neer <en91neer@gmail.com>
+Date:   Sun Jun 7 23:44:51 2026 +0900
+
+    회의록 어드민과 개인사용자 분리적용
+
+[33mcommit 695d36d974b2a9ace15ae6ed238a053af19254ad[m
+Author: en91neer <en91neer@gmail.com>
+Date:   Sun Jun 7 14:51:28 2026 +0900
+
+    회의록 로그인 및 모바일환경 개선
+
+[33mcommit a29fd182439615fb4f09f3101373b57cd4646e20[m
+Author: en91neer <en91neer@gmail.com>
+Date:   Sun Jun 7 01:59:00 2026 +0900
+
+    Allow frontend CORS for CloudType
+
+[33mcommit e64d70f63b6b5406861cd1ba94edcccb64b85fb2[m
+Author: en91neer <en91neer@gmail.com>
+Date:   Sun Jun 7 00:53:39 2026 +0900
+
+    모바일전용 새로운 UI적용
+
+[33mcommit 513eaa5af694cb716f6e9ef602a0eff279099b16[m
+Author: en91neer <en91neer@gmail.com>
+Date:   Sat Jun 6 19:20:58 2026 +0900
+
+    회의록 DB변경
+
+[33mcommit 743741439f4812bb913e0b93b7534e545e546eff[m
+Author: en91neer <en91neer@gmail.com>
+Date:   Sat Jun 6 19:09:40 2026 +0900
+
+    회의록 AI분석 최초커밋

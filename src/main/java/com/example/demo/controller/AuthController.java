@@ -38,7 +38,7 @@ public class AuthController {
     public String signup(@RequestBody SignupRequestDto dto) {
         authService.signup(dto);
 
-        return "회원가입이 완료되었습니다. 이메일 인증 후 로그인할 수 있습니다.33";
+        return "회원가입이 완료되었습니다. 이메일 인증 후 로그인할 수 있습니다.";
     }
 
     @PostMapping("/verify-code")
